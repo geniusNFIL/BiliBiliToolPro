@@ -7,46 +7,38 @@ on:
     - cron: '0 1 * * *'   # 每天凌晨1:00 UTC执行大会员大积分任务
 
 jobs:
-  run-tasks:
+  bilibili-automation:
     runs-on: windows-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
-    # 扫码登录任务
-    - name: Login
-      shell: pwsh
-      run: |
-        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks Login
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '6.0' # 请根据BiliBiliToolPro项目的实际需求设置.NET版本
 
-    # 每日任务
-    - name: Daily
-      shell: pwsh
-      run: |
-        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks Daily
+    - name: Restore dependencies
+      run: dotnet restore
 
-    # 天选时刻抽奖
-    - name: LiveLottery
-      shell: pwsh
-      env:
-        LIVE_LOTTERY_ENABLED: true
-      run: |
-        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks LiveLottery
+    - name: Build BiliBiliToolPro
+      run: dotnet build --no-restore
 
-    # 批量取关
-    - name: UnfollowBatched
-      shell: pwsh
-      run: |
-        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks UnfollowBatched
+    - name: Run Login Task
+      run: dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks Login
 
-    # 大会员大积分
-    - name: VipBigPoint
-      shell: pwsh
-      run: |
-        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks VipBigPoint
+    - name: Run Daily Task
+      run: dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks Daily
 
-    # 直播间挂机
-    - name: LiveFansMedal
-      shell: pwsh
-      run: |
-        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks LiveFansMedal
+    - name: Run LiveLottery Task
+      if: env.LIVE_LOTTERY_ENABLED == 'true' # 假设您设置了环境变量来控制此任务的执行
+      run: dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks LiveLottery
+
+    - name: Run UnfollowBatched Task
+      run: dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks UnfollowBatched
+
+    - name: Run VipBigPoint Task
+      run: dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks VipBigPoint
+
+    - name: Run LiveFansMedal Task
+      run: dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks LiveFansMedal
