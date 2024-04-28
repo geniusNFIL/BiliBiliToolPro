@@ -1,5 +1,3 @@
-name: BiliBiliToolPro Automation
-
 on:
   schedule:
     - cron: '16 2 * * *'  # 每天02:16 UTC执行每日任务
