@@ -1,0 +1,52 @@
+name: BiliBiliToolPro Automation
+
+on:
+  schedule:
+    - cron: '16 2 * * *'  # 每天02:16 UTC执行每日任务和天选时刻抽奖
+    - cron: '0 13 * * *'  # 每天13:00 UTC执行批量取关和直播间挂机
+    - cron: '0 1 * * *'   # 每天凌晨1:00 UTC执行大会员大积分任务
+
+jobs:
+  run-tasks:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # 扫码登录任务
+    - name: Login
+      shell: pwsh
+      run: |
+        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks Login
+
+    # 每日任务
+    - name: Daily
+      shell: pwsh
+      run: |
+        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks Daily
+
+    # 天选时刻抽奖
+    - name: LiveLottery
+      shell: pwsh
+      env:
+        LIVE_LOTTERY_ENABLED: true
+      run: |
+        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks LiveLottery
+
+    # 批量取关
+    - name: UnfollowBatched
+      shell: pwsh
+      run: |
+        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks UnfollowBatched
+
+    # 大会员大积分
+    - name: VipBigPoint
+      shell: pwsh
+      run: |
+        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks VipBigPoint
+
+    # 直播间挂机
+    - name: LiveFansMedal
+      shell: pwsh
+      run: |
+        dotnet run --project Ray.BiliBiliTool.Console/Ray.BiliBiliTool.Console.csproj --RunTasks LiveFansMedal
